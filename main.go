@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"example.com/socks/requests"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/bubbles/list"
 )
 
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
@@ -21,6 +23,7 @@ func (c command) FilterValue() string { return c.title }
 
 type Model struct {
 	list list.Model
+	text string
 }
 
 func (m Model) Init() tea.Cmd {
@@ -28,11 +31,47 @@ func (m Model) Init() tea.Cmd {
 } 
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var (
+		cmd tea.Cmd
+		cmds []tea.Cmd
+	)
+
+	config := request.Config{}
+
+	token, exists := os.LookupEnv("SOCKS_TOKEN")
+
+	if !exists {
+		log.Fatal("SOCKS_TOKEN does not exist as an environment variable!")
+	}
+
+	domain, exists := os.LookupEnv("SOCKS_DOMAIN")
+
+	if !exists {
+		log.Fatal("SOCKS_DOMAIN does not exist as an environment variable!")
+	}
+
+	config.Token = token
+	config.Domain = domain
+
 	switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
 				case "ctrl+c", "q":
 					return m, tea.Quit
+
+				case "enter", " ":
+					switch m.list.SelectedItem().FilterValue() {
+					case "Get Courses":
+						courses, err := request.GetCourses(config)
+
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						m.text = courses.View.View()
+					}
+
+					return m, nil
 			}
 
 			case tea.WindowSizeMsg:
@@ -44,10 +83,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 	}
 
-	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
+	cmds = append(cmds, cmd)
 
-	return m, cmd
+	return m, tea.Batch(cmds...)
 }
 
 func (m Model) View() string {
@@ -56,8 +95,10 @@ func (m Model) View() string {
 	s += docStyle.Render(m.list.View())
 	
 	m.list.Select(m.list.Cursor())
-	
-	s += m.list.SelectedItem().FilterValue()
+
+	if m.text != "" {
+		s = m.text
+	}
 
 	return s
 }

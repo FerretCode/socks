@@ -5,14 +5,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"example.com/socks/views"
+	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Course struct {
 	Id uint64 `json:"id"`
+	Name string `json:"name"` 
 }
 
 type Courses struct {
 	Courses []Course	
+	View view.TableModel
 	Error error
 }
 
@@ -51,6 +57,43 @@ func GetCourses(config Config) (Courses, error) {
 
 	if jsonErr := json.Unmarshal(body, &courses.Courses); err != nil {
 		log.Fatal(jsonErr)
+	}
+
+	columns := []table.Column{
+		{Title: "ID", Width: 10},
+		{Title: "Name", Width: 50},
+	}	
+
+	rows := []table.Row{}
+
+	for _, c := range courses.Courses {
+		row := table.Row{fmt.Sprint(c.Id), fmt.Sprint(c.Name)}
+
+		rows = append(rows, row)
+	}
+
+	t := table.New(
+		table.WithColumns(columns),
+		table.WithRows(rows),
+		table.WithFocused(true),
+	)
+
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(false)
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	t.SetStyles(s)
+
+	courses.View = view.TableModel{
+		Table: t,
+		Columns: columns,
+		Row: rows,
 	}
 
 	return courses, nil
