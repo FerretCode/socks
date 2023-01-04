@@ -53,35 +53,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	config.Token = token
 	config.Domain = domain
 
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-
-		case "enter", " ":
-			switch m.list.SelectedItem().FilterValue() {
-			case "Get Courses":
-				courses, err := request.GetCourses(config)
-
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				m.text = courses.View.View()
-			}
-
-			return m, nil
-		}
-
-	case tea.WindowSizeMsg:
-		h, v := docStyle.GetFrameSize()
-		m.list.SetSize(msg.Width-h, msg.Height-v)
-
-	default:
-		var cmd tea.Cmd
-		return m, cmd
-	}
+	initialModelUpdate(m, msg, &config)
 
 	m.list, cmd = m.list.Update(msg)
 	cmds = append(cmds, cmd)
@@ -124,4 +96,40 @@ func main() {
 		fmt.Printf("There was an error: %v", err)
 		os.Exit(1)
 	}
+}
+
+func initialModelUpdate(m Model, msg tea.Msg, config &request.Config) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+
+		case "enter", " ":
+			switch m.list.SelectedItem().FilterValue() {
+			case "Get Courses":
+				courses, err := request.GetCourses(config)
+
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				m.text = courses.View.View()
+			}
+
+			return m, nil
+		}
+
+	case tea.WindowSizeMsg:
+		h, v := docStyle.GetFrameSize()
+		m.list.SetSize(msg.Width-h, msg.Height-v)
+
+	default:
+		var cmd tea.Cmd
+		return m, cmd
+
+	}
+
+	var cmd tea.Cmd
+	return m, cmd
 }
