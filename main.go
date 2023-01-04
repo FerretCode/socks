@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"example.com/socks/requests"
+	request "example.com/socks/requests"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -28,11 +28,11 @@ type Model struct {
 
 func (m Model) Init() tea.Cmd {
 	return nil
-} 
+}
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
-		cmd tea.Cmd
+		cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
 
@@ -54,33 +54,33 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	config.Domain = domain
 
 	switch msg := msg.(type) {
-		case tea.KeyMsg:
-			switch msg.String() {
-				case "ctrl+c", "q":
-					return m, tea.Quit
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
 
-				case "enter", " ":
-					switch m.list.SelectedItem().FilterValue() {
-					case "Get Courses":
-						courses, err := request.GetCourses(config)
+		case "enter", " ":
+			switch m.list.SelectedItem().FilterValue() {
+			case "Get Courses":
+				courses, err := request.GetCourses(config)
 
-						if err != nil {
-							log.Fatal(err)
-						}
+				if err != nil {
+					log.Fatal(err)
+				}
 
-						m.text = courses.View.View()
-					}
-
-					return m, nil
+				m.text = courses.View.View()
 			}
 
-			case tea.WindowSizeMsg:
-				h, v := docStyle.GetFrameSize()
-				m.list.SetSize(msg.Width-h, msg.Height-v)
+			return m, nil
+		}
 
-		default:
-			var cmd tea.Cmd
-			return m, cmd
+	case tea.WindowSizeMsg:
+		h, v := docStyle.GetFrameSize()
+		m.list.SetSize(msg.Width-h, msg.Height-v)
+
+	default:
+		var cmd tea.Cmd
+		return m, cmd
 	}
 
 	m.list, cmd = m.list.Update(msg)
@@ -93,7 +93,7 @@ func (m Model) View() string {
 	s := ""
 
 	s += docStyle.Render(m.list.View())
-	
+
 	m.list.Select(m.list.Cursor())
 
 	if m.text != "" {
@@ -106,16 +106,16 @@ func (m Model) View() string {
 func main() {
 	commands := []list.Item{
 		command{
-			title: "Get Courses", 
-			desc: "Fetch all courses from Canvas",
+			title: "Get Courses",
+			desc:  "Fetch all courses from Canvas",
 		},
 		command{
 			title: "Get Assignments for Course",
-			desc: "Fetch all assignments for a given course",
+			desc:  "Fetch all assignments for a given course",
 		},
-	} 
+	}
 
-	m := Model{list: list.New(commands, list.NewDefaultDelegate(), 0, 0),}
+	m := Model{list: list.New(commands, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "Commands"
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
