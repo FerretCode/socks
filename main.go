@@ -53,7 +53,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	config.Token = token
 	config.Domain = domain
 
-	initialModelUpdate(m, msg, &config)
+	initialModelUpdate(m, msg, config)
 
 	m.list, cmd = m.list.Update(msg)
 	cmds = append(cmds, cmd)
@@ -98,7 +98,7 @@ func main() {
 	}
 }
 
-func initialModelUpdate(m Model, msg tea.Msg, config &request.Config) (Model, tea.Cmd) {
+func initialModelUpdate(m Model, msg tea.Msg, config request.Config) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
