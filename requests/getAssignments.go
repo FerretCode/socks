@@ -1,7 +1,7 @@
-package request
+package requests
 
 import (
-	view "example.com/socks/views"
+	"github.com/FerretCode/socks/views"
 )
 
 type Assignment struct {
@@ -14,7 +14,7 @@ type Assignment struct {
 
 type Assignments struct {
 	Assignments []Assignment
-	View        view.TableModel
+	View        views.TableModel
 	Error       error
 }
 
