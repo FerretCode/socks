@@ -1,4 +1,4 @@
-package request
+package requests
 
 import (
 	"encoding/json"
@@ -6,19 +6,19 @@ import (
 	"log"
 	"net/http"
 
-	"example.com/socks/views"
+	"github.com/FerretCode/socks/views"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type Course struct {
 	Id uint64 `json:"id"`
-	Name string `json:"name"` 
+	Name string `json:"name"`
 }
 
 type Courses struct {
-	Courses []Course	
-	View view.TableModel
+	Courses []Course
+	View views.TableModel
 	Error error
 }
 
@@ -62,7 +62,7 @@ func GetCourses(config Config) (Courses, error) {
 	columns := []table.Column{
 		{Title: "ID", Width: 10},
 		{Title: "Name", Width: 50},
-	}	
+	}
 
 	rows := []table.Row{}
 
@@ -90,7 +90,7 @@ func GetCourses(config Config) (Courses, error) {
 		Bold(false)
 	t.SetStyles(s)
 
-	courses.View = view.TableModel{
+	courses.View = views.TableModel{
 		Table: t,
 		Columns: columns,
 		Row: rows,

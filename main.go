@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	request "example.com/socks/requests"
+	"github.com/FerretCode/socks/requests"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -36,7 +36,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds []tea.Cmd
 	)
 
-	config := request.Config{}
+	config := requests.Config{}
 
 	token, exists := os.LookupEnv("SOCKS_TOKEN")
 
@@ -98,7 +98,7 @@ func main() {
 	}
 }
 
-func initialModelUpdate(m Model, msg tea.Msg, config request.Config) (Model, tea.Cmd) {
+func initialModelUpdate(m Model, msg tea.Msg, config requests.Config) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -108,7 +108,7 @@ func initialModelUpdate(m Model, msg tea.Msg, config request.Config) (Model, tea
 		case "enter", " ":
 			switch m.list.SelectedItem().FilterValue() {
 			case "Get Courses":
-				courses, err := request.GetCourses(config)
+				courses, err := requests.GetCourses(config)
 
 				if err != nil {
 					log.Fatal(err)
